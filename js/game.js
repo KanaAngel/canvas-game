@@ -1,10 +1,31 @@
 class TestScene extends Scene {
+  constructor() {
+    super();
+    this.init();
+  }
+
+  init() {
+    var character = new Character();
+    this.gameObjects.push(character);
+  }
+
   update(ctx, step) {
     ctx.fillStyle = `white`;
     ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
 
-    ctx.fillStyle = `red`;
-    ctx.fillRect((step % ctx.canvas.width) - 5,0,32,32);
+
+    this.gameObjects.forEach((obj) => {
+      obj.update(ctx, step);
+    });
+  }
+}
+
+class Character extends GameObject {
+  input = new ArrowInput();
+
+  update(ctx, step) {
+    ctx.fillStyle = `rgb(0,${255 - (step / 2 % 255)},0)`;
+    if (this.input.up > 0) ctx.fillRect(0, 0, 10, 10);
   }
 }
 
