@@ -5,14 +5,12 @@ class TestScene extends Scene {
   }
 
   init() {
-    var character = new Character();
+    var character = new Spearman();
     this.gameObjects.push(character);
   }
 
   update(ctx, step) {
-    ctx.fillStyle = `white`;
-    ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     this.gameObjects.forEach((obj) => {
       obj.update(ctx, step);
@@ -26,6 +24,42 @@ class Character extends GameObject {
   update(ctx, step) {
     ctx.fillStyle = `rgb(0,${255 - (step / 2 % 255)},0)`;
     if (this.input.up > 0) ctx.fillRect(0, 0, 10, 10);
+  }
+}
+
+class Spearman extends Character {
+  spritesheet = new Image();
+  draw = false;
+  spriteWidth = 86;
+  spriteHeight = 64;
+
+  constructor() {
+    super();
+    this.vector2 = new Vector2(100, 100);
+
+    this.spritesheet = new Image();
+    this.spritesheet.onload = () => { this.draw = true; };
+    this.spritesheet.src = './sprite/spearman.png';
+  }
+
+  update(ctx, step) {
+    ctx.fillStyle = `rgb(0,${255 - (step / 2 % 255)},0)`;
+    ctx.fillRect(0, 0, 10, 10);
+
+    if (!this.draw) return;
+    ctx.imageSmoothingEnabled = false;
+
+    ctx.save();
+
+    ctx.translate(this.vector2.x, this.vector2.y);
+    ctx.scale(1, 1);
+    ctx.drawImage(this.spritesheet,
+      0, 0,
+      this.spriteWidth, this.spriteHeight,
+      -this.spriteWidth / 2, -this.spriteHeight / 2,
+      2 * this.spriteWidth, 2 * this.spriteHeight);
+
+    ctx.restore();
   }
 }
 
