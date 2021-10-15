@@ -1,20 +1,61 @@
 class TestScene extends Scene {
+  camera = null;
+
   constructor() {
     super();
     this.init();
   }
 
   init() {
+    this.camera = new Camera(this);
     var character = new Spearman();
     this.gameObjects.push(character);
   }
 
   update(ctx, step) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.imageSmoothingEnabled = false;
+    this.camera.draw(ctx, step);
+  }
+}
 
-    this.gameObjects.forEach((obj) => {
-      obj.update(ctx, step);
+class Camera {
+  scene = null;
+  center = new Vector2(0, 0);
+  unitsPerPixel = .3;
+
+  constructor(scene) {
+    this.scene = scene;
+  }
+
+  draw(ctx, step) {
+    this.scene.gameObjects.forEach((obj) => {
+      //obj.update(ctx, step);
+
+      ctx.save();
+
+      let i = obj.getDrawInstructions();
+      ctx.translate(i.drawRect.x, i.drawRect.y);
+      ctx.drawImage(i.image,
+        i.imageRect.x, i.imageRect.y,
+        i.imageRect.w, i.imageRect.h,
+        -i.drawRect.w / 2, -i.drawRect.h / 2,
+        (1 / this.unitsPerPixel) * i.drawRect.w, (1 / this.unitsPerPixel) * i.drawRect.h);
+
+      ctx.restore();
     });
+  }
+}
+
+class DrawInstructions {
+  drawRect;
+  image;
+  imageRect;
+
+  constructor(drawRect, image, imageRect) {
+    this.drawRect = drawRect;
+    this.image = image;
+    this.imageRect = imageRect;
   }
 }
 
@@ -23,7 +64,7 @@ class Character extends GameObject {
 
   update(ctx, step) {
     ctx.fillStyle = `rgb(0,${255 - (step / 2 % 255)},0)`;
-    if (this.input.up > 0) ctx.fillRect(0, 0, 10, 10);
+    //if (this.input.up > 0) ctx.fillRect(0, 0, 10, 10);
   }
 }
 
@@ -60,6 +101,13 @@ class Spearman extends Character {
       2 * this.spriteWidth, 2 * this.spriteHeight);
 
     ctx.restore();
+  }
+
+  getDrawInstructions() {
+    return new DrawInstructions(
+      { x: this.vector2.x, y: this.vector2.y, w: this.spriteWidth, h: this.spriteHeight },
+      this.spritesheet,
+      { x: 0, y: 0, w: this.spriteWidth, h: this.spriteHeight });
   }
 }
 
